@@ -6,17 +6,15 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
 
-// function generateRandomString() {
-//   let randomSix   = '';
-//   let chars       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let charsLength = characters.length;
-//   for (var i = 0; i < 6; i++) {
-//     randomSix += chars.charAt(Math.floor(Math.random() * charsLength));
-//   }
-//   return randomSix;
-// }
-
-console.log(makeid(5));
+function generateRandomString() {
+  let randomSix   = '';
+  let chars       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charsLength = chars.length;
+  for (var i = 0; i < 6; i++) {
+    randomSix += chars.charAt(Math.floor(Math.random() * charsLength));
+  }
+  return randomSix;
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -37,8 +35,11 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString(); // Hat tip to Devin McGillivray for the spoiler/hint
+  urlDatabase[shortURL] = req.body.longURL; // Hat tip to Devin McGillivray for the spoiler/hint
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortURL}`); // Hat tip to Paul Ladd for the spoiler/hint
+  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/new", (req, res) => {
