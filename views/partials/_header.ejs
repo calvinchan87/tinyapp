@@ -8,15 +8,24 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <!-- Login form -->
-        <form class="form-inline" action="/login" method="POST"><!-- a single text input with name="username" -->
-          <div class="form-group mb-2"></div>
-            <label for="signIn">Sign in:</label>
-            <input class="form-control" type="text" name="username" placeholder="Username" style="width: 300px; margin: 1em">
-            <button type="signIn" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
-        <!-- Login form -->
+        
+        <% if(username === undefined){ %>
+          <!-- Login form -->
+          <form class="form-inline" action="/login" method="POST"><!-- a single text input with name="username" -->
+            <div class="form-group mb-2"></div>
+              <label for="signIn">Sign in:</label>
+              <input class="form-control" type="text" name="username" placeholder="Username" style="width: 300px; margin: 1em">
+              <button type="login" class="btn btn-primary">Login</button>
+            </div>
+          </form>
+          <!-- Login form -->
+        <% } else{ %>  
+          <label for="username">Logged in as: <%= username%></label> <!-- Hat tip to Ievgen Dilevskyi for the spoiler/hint -->
+          <form class="form-inline" action="/logout" method="POST">
+            <button type="logout" class="btn btn-primary">Logout</button>
+          </form>
+        <% } %>
+
       </div>
     </div>
   </nav>

@@ -3,8 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-const cookieParser = require("cookie-parser"); // Hat tip to Caden
-app.use(cookieParser()); // Hat tip to Penny, "name" param needed to be "username"
+const cookieParser = require("cookie-parser"); // Hat tip to Caden for the spoiler/hint
+app.use(cookieParser()); // Hat tip to Penny for the spoiler/hint
 
 app.set("view engine", "ejs");
 
@@ -32,7 +32,10 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"], // Display the Username
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -45,7 +48,10 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"], // Display the Username
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -54,7 +60,11 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = {
+    username: req.cookies["username"], // Display the Username
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -74,7 +84,12 @@ app.post("/login", (req, res) => {
   res.redirect('/urls/');
 });
 
-// Hat tip to Ievgen <label for="username"><%= username%></label>
+app.post("/logout", (req, res) => {
+  res.clearCookie('username'); // clears the username cookie
+  res.redirect('/urls/');
+});
+
+// Hat tip to Penny req.cookies["username"] seems to always come back undefined, the problem was that my "name" param needed to be "username"
 // Hat tip to Ievgen user: users[req.cookies.user_id] && <%= user.email%>
 
 app.get("/hello", (req, res) => {
