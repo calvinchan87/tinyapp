@@ -5,8 +5,6 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require("cookie-parser"); // Hat tip to Caden
 app.use(cookieParser()); // Hat tip to Penny, "name" param needed to be "username"
-// Hat tip to Ievgen <label for="username"><%= username%></label>
-// Hat tip to Ievgen user: users[req.cookies.user_id] && <%= user.email%>
 
 app.set("view engine", "ejs");
 
@@ -71,10 +69,13 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = res.cookie();
-  // It should set a cookie named username to the value submitted in the request body via the login form
+  res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
+  console.log(req.body.username);
   res.redirect('/urls/');
 });
+
+// Hat tip to Ievgen <label for="username"><%= username%></label>
+// Hat tip to Ievgen user: users[req.cookies.user_id] && <%= user.email%>
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
