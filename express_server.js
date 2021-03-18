@@ -92,6 +92,14 @@ app.post("/logout", (req, res) => {
 // Hat tip to Penny req.cookies["username"] seems to always come back undefined, the problem was that my "name" param needed to be "username"
 // Hat tip to Ievgen user: users[req.cookies.user_id] && <%= user.email%>
 
+// Create a Registration Page (seems like urls_new is a good template)
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_register", templateVars);
+});
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
