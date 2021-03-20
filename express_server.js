@@ -125,7 +125,7 @@ app.post("/register", (req, res) => {
   users[randomSix] = user;
   // console.log(user);
   // console.log(users);
-  res.cookie('username', randomSix);
+  res.cookie('user_id', randomSix);
   res.redirect('/urls/');
 });
 
