@@ -9,7 +9,7 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         
-        <% if(username === undefined){ %>
+        <% if(user === undefined){ %>
           <!-- Login form -->
           <form class="form-inline" action="/login" method="POST"><!-- a single text input with name="username" -->
             <div class="form-group mb-2"></div>
@@ -20,7 +20,7 @@
           </form>
           <!-- Login form -->
         <% } else{ %>  
-          <label for="username">Logged in as: <%= username%></label> <!-- Hat tip to Ievgen Dilevskyi for the spoiler/hint -->
+          <label for="username">Logged in as: <%= user.email%></label> <!-- Hat tip to Ievgen Dilevskyi for the spoiler/hint -->
           <form class="form-inline" action="/logout" method="POST">
             <button type="logout" class="btn btn-primary">Logout</button>
           </form>

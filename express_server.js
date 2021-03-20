@@ -46,8 +46,9 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"], // Display the Username
-    urls: urlDatabase
+    // username: req.cookies["username"], // Display the Username
+    urls: urlDatabase,
+    user: users[req.cookies.user_id]
   };
   res.render("urls_index", templateVars);
 });
@@ -55,14 +56,15 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); // Hat tip to Devin McGillivray for the spoiler/hint
   urlDatabase[shortURL] = req.body.longURL; // Hat tip to Devin McGillivray for the spoiler/hint
-  console.log(req.body);  // Log the POST request body to the console
+  // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`); // Hat tip to Paul Ladd for the spoiler/hint
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"], // Display the Username
+    // username: req.cookies["username"], // Display the Username
+    user: users[req.cookies.user_id]
   };
   res.render("urls_new", templateVars);
 });
@@ -74,9 +76,10 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"], // Display the Username
+    // username: req.cookies["username"], // Display the Username
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL],
+    user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -92,23 +95,27 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  console.log(req.body);
   res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
-  console.log(req.body.username);
+  // console.log(req.body.username);
   res.redirect('/urls/');
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username'); // clears the username cookie
+  // res.clearCookie('username'); // clears the username cookie
+  res.clearCookie('user_id');
   res.redirect('/urls/');
 });
 
-// Hat tip to Penny req.cookies["username"] seems to always come back undefined, the problem was that my "name" param needed to be "username"
-// Hat tip to Ievgen user: users[req.cookies.user_id] && <%= user.email%>
+// Hat tip to Penny req.cookies["username"] seems to always come back undefined,
+// the problem was that my "name" param needed to be "username"
+// Hat tip to Ievgen <%= user.email%>
 
 // Create a Registration Page (seems like urls_new is a good template)
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
+    user: users[req.cookies.user_id] // Hat tip to Ievgen Dilevskyi for the spoiler/hint
   };
   res.render("urls_register", templateVars);
 });
