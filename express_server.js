@@ -23,6 +23,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -98,6 +111,22 @@ app.get("/register", (req, res) => {
     username: req.cookies["username"],
   };
   res.render("urls_register", templateVars);
+});
+
+// Create a Registration Handler (seems like POST to edit longURL is a good template)
+app.post("/register", (req, res) => {
+  // console.log(req.body);
+  const randomSix = generateRandomString();
+  let user = {
+    id: randomSix,
+    email: req.body.email,
+    password: req.body.password
+  };
+  users[randomSix] = user;
+  // console.log(user);
+  // console.log(users);
+  res.cookie('username', randomSix);
+  res.redirect('/urls/');
 });
 
 app.get("/hello", (req, res) => {
