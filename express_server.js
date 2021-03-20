@@ -120,18 +120,40 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+const doesEmailExist = function(input) {
+  for (const x in users) {
+    if (users[x].email === input) {
+      return true;
+    }
+  }
+};
+
 // Create a Registration Handler (seems like POST to edit longURL is a good template)
 app.post("/register", (req, res) => {
   // console.log(req.body);
   const randomSix = generateRandomString();
+
   let user = {
     id: randomSix,
     email: req.body.email,
     password: req.body.password
   };
+
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send("400: Please enter a valid email address and password.");
+    console.log("400 error");
+    return;
+  };
+
+  if (doesEmailExist(req.body.email) === true) {
+    res.status(400).send("400: Email already exists."); // Hat tip to @latagore for res.status(400).syntax
+    console.log("400 error");
+    return;
+  };
+
   users[randomSix] = user;
   // console.log(user);
-  // console.log(users);
+  console.log(users);
   res.cookie('user_id', randomSix);
   res.redirect('/urls/');
 });
