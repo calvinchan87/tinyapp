@@ -18,6 +18,14 @@ function generateRandomString() {
   return randomSix;
 };
 
+const doesEmailExist = function(input) {
+  for (const x in users) {
+    if (users[x].email === input) {
+      return true;
+    }
+  }
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -94,6 +102,15 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect('/urls/');
 });
 
+//Create a Login Page
+app.get("/login", (req, res) => {
+  const templateVars = {
+    // username: req.cookies["username"],
+    user: users[req.cookies.user_id]
+  };
+  res.render("urls_login", templateVars);
+});
+
 app.post("/login", (req, res) => {
   console.log(req.body);
   res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
@@ -119,14 +136,6 @@ app.get("/register", (req, res) => {
   };
   res.render("urls_register", templateVars);
 });
-
-const doesEmailExist = function(input) {
-  for (const x in users) {
-    if (users[x].email === input) {
-      return true;
-    }
-  }
-};
 
 // Create a Registration Handler (seems like POST to edit longURL is a good template)
 app.post("/register", (req, res) => {
