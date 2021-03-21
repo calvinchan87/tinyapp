@@ -28,8 +28,10 @@ const getUserIDByEmail = function(input) {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  // "b2xVn2": "http://www.lighthouselabs.ca",
+  // "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" }
 };
 
 const users = { 
@@ -64,13 +66,21 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); // Hat tip to Devin McGillivray for the spoiler/hint
-  urlDatabase[shortURL] = req.body.longURL; // Hat tip to Devin McGillivray for the spoiler/hint
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL, // Hat tip to Devin McGillivray for the spoiler/hint
+    userID: users[req.cookies.user_id]
+  }
   // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`); // Hat tip to Paul Ladd for the spoiler/hint
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/new", (req, res) => {
+  if (users[req.cookies.user_id] === undefined) {
+    res.redirect('/login');
+    return;
+  };
+
   const templateVars = {
     // username: req.cookies["username"], // Display the Username
     user: users[req.cookies.user_id]
@@ -79,7 +89,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]; // Hat tip to Ievgen Dilevskyi for the spoiler/hint
+  const longURL = urlDatabase[req.params.shortURL].longURL; // Hat tip to Ievgen Dilevskyi for the spoiler/hint
   res.redirect(longURL);
 });
 
@@ -87,7 +97,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     // username: req.cookies["username"], // Display the Username
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
@@ -99,7 +109,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL; // Manali Bhattacharyya RA
+  urlDatabase[req.params.shortURL].longURL = req.body.longURL; // Manali Bhattacharyya RA
   res.redirect('/urls/');
 });
 
