@@ -27,11 +27,21 @@ const getUserIDByEmail = function(input) {
   return false;
 };
 
+const urlsForUser = function(input) {
+  let customURLs = {};
+  for (const x in urlDatabase) {
+    if (urlDatabase[x].userID === input) {
+      customURLs[x] = urlDatabase[x];
+    }
+  }
+  return customURLs;
+};
+
 const urlDatabase = {
   // "b2xVn2": "http://www.lighthouselabs.ca",
   // "9sm5xK": "http://www.google.com"
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" }
+  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
 const users = { 
@@ -56,9 +66,18 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  if (users[req.cookies.user_id] === undefined) {
+    res.status(403).send("403: Log in or register first to see shortened URLs.");
+    console.log("403 error");
+    return;
+  };
+  
+  // console.log(urlDatabase);
+  // console.log(urlsForUser(users[req.cookies.user_id].id));
+
   const templateVars = {
     // username: req.cookies["username"], // Display the Username
-    urls: urlDatabase,
+    urls: urlsForUser(users[req.cookies.user_id].id),
     user: users[req.cookies.user_id]
   };
   res.render("urls_index", templateVars);
@@ -68,7 +87,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); // Hat tip to Devin McGillivray for the spoiler/hint
   urlDatabase[shortURL] = {
     longURL: req.body.longURL, // Hat tip to Devin McGillivray for the spoiler/hint
-    userID: users[req.cookies.user_id]
+    userID: users[req.cookies.user_id].id
   }
   // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`); // Hat tip to Paul Ladd for the spoiler/hint
@@ -191,7 +210,7 @@ app.post("/register", (req, res) => {
   users[randomSix] = user;
   // console.log(user);
   // console.log(users);
-  res.cookie('user_id', randomSix);
+  res.cookie('user_id', users[randomSix].id);
   res.redirect('/urls/');
 });
 
