@@ -128,6 +128,7 @@ app.post("/login", (req, res) => {
   if (users[userIDInQuestion].password === req.body.password) {
     res.cookie('user_id', users[userIDInQuestion].id);
     res.redirect('/urls/');
+    return;
   }
   
     res.status(403).send("403: Password does not match.");
