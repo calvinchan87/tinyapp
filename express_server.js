@@ -18,12 +18,13 @@ function generateRandomString() {
   return randomSix;
 };
 
-const doesEmailExist = function(input) {
+const getUserIDByEmail = function(input) {
   for (const x in users) {
     if (users[x].email === input) {
-      return true;
+      return users[x].id; // refactoring ideas from @wesley-wong and @berk-ozer
     }
   }
+  return false;
 };
 
 const urlDatabase = {
@@ -112,10 +113,26 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log(req.body);
-  res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
+  // console.log(req.body);
+  // res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
   // console.log(req.body.username);
-  res.redirect('/urls/');
+
+  let userIDInQuestion = getUserIDByEmail(req.body.email);
+
+  if (userIDInQuestion === false) {
+    res.status(403).send("403: Email can not be found.");
+    console.log("403 error");
+    return;
+  };
+
+  if (users[userIDInQuestion].password === req.body.password) {
+    res.cookie('user_id', users[userIDInQuestion].id);
+    res.redirect('/urls/');
+  }
+  
+    res.status(403).send("403: Password does not match.");
+    console.log("403 error");
+  
 });
 
 app.post("/logout", (req, res) => {
@@ -154,7 +171,7 @@ app.post("/register", (req, res) => {
     return;
   };
 
-  if (doesEmailExist(req.body.email) === true) {
+  if (getUserIDByEmail(req.body.email) !== false) {
     res.status(400).send("400: Email already exists."); // Hat tip to @latagore for res.status(400).syntax
     console.log("400 error");
     return;
@@ -162,7 +179,7 @@ app.post("/register", (req, res) => {
 
   users[randomSix] = user;
   // console.log(user);
-  console.log(users);
+  // console.log(users);
   res.cookie('user_id', randomSix);
   res.redirect('/urls/');
 });
