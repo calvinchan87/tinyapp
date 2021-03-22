@@ -113,6 +113,18 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  if (users[req.cookies.user_id] === undefined) {
+    res.status(403).send("403: Log in or register first to see shortened URL details.");
+    console.log("403 error");
+    return;
+  }
+  
+  if (users[req.cookies.user_id].id !== urlDatabase[req.params.shortURL].userID) {
+    res.status(403).send("403: This shortened URL does not belong to you, so its details can not be accessed.");
+    console.log("403 error");
+    return;
+  }
+
   const templateVars = {
     // username: req.cookies["username"], // Display the Username
     shortURL: req.params.shortURL,
@@ -123,6 +135,18 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  if (users[req.cookies.user_id] === undefined) {
+    res.status(403).send("403: Log in or register first to delete URLs.");
+    console.log("403 error");
+    return;
+  }
+  
+  if (users[req.cookies.user_id].id !== urlDatabase[req.params.shortURL].userID) {
+    res.status(403).send("403: This shortened URL does not belong to you, so it can not be deleted.");
+    console.log("403 error");
+    return;
+  }
+
   delete urlDatabase[req.params.shortURL]; // Edward Smith RA
   res.redirect('/urls/');
 });
