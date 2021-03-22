@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require("cookie-parser"); // Hat tip to Caden for the spoiler/hint
 app.use(cookieParser()); // Hat tip to Penny for the spoiler/hint
+const bcrypt = require('bcryptjs');
 
 app.set("view engine", "ejs");
 
@@ -48,12 +49,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   }
 }
 
@@ -178,7 +179,7 @@ app.post("/login", (req, res) => {
     return;
   };
 
-  if (users[userIDInQuestion].password === req.body.password) {
+  if (bcrypt.compareSync(req.body.password, users[userIDInQuestion].password)) { //Modify your login endpoint to use bcrypt to check the password.
     res.cookie('user_id', users[userIDInQuestion].id);
     res.redirect('/urls/');
     return;
@@ -212,11 +213,12 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   // console.log(req.body);
   const randomSix = generateRandomString();
+  const unhashedPassword = req.body.password;
 
   let user = {
     id: randomSix,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(unhashedPassword, 10) // Modify your registration endpoint to use bcrypt to hash the password
   };
 
   if (req.body.email === "" || req.body.password === "") {
