@@ -19,10 +19,10 @@ function generateRandomString() {
   return randomSix;
 };
 
-const getUserIDByEmail = function(input) {
+const getUserByEmail = function(input) {
   for (const x in users) {
     if (users[x].email === input) {
-      return users[x].id; // refactoring ideas from @wesley-wong and @berk-ozer
+      return users[x]; // refactoring ideas from @wesley-wong and @berk-ozer
     }
   }
   return false;
@@ -186,7 +186,7 @@ app.post("/login", (req, res) => {
   // res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
   // console.log(req.body.username);
 
-  let userIDInQuestion = getUserIDByEmail(req.body.email);
+  let userIDInQuestion = getUserByEmail(req.body.email).id;
 
   if (userIDInQuestion === false) {
     res.status(403).send("403: Email can not be found.");
@@ -242,7 +242,7 @@ app.post("/register", (req, res) => {
     return;
   };
 
-  if (getUserIDByEmail(req.body.email) !== false) {
+  if (getUserByEmail(req.body.email) !== false) {
     res.status(400).send("400: Email already exists."); // Hat tip to @latagore for res.status(400).syntax
     console.log("400 error");
     return;
