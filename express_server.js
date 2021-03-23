@@ -90,6 +90,13 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL, // Hat tip to Devin McGillivray for the spoiler/hint
     userID: users[req.cookies.user_id].id
   }
+  
+  if (urlDatabase[shortURL].longURL.startsWith('http://') || urlDatabase[shortURL].longURL.startsWith('https://')) {
+
+  } else {
+    urlDatabase[shortURL].longURL = 'http://' + urlDatabase[shortURL].longURL;
+  }
+
   // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`); // Hat tip to Paul Ladd for the spoiler/hint
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
@@ -153,7 +160,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body.longURL; // Manali Bhattacharyya RA
+
+  let updatedURL = req.body.longURL;
+  if (updatedURL.startsWith('http://') || updatedURL.startsWith('https://')) {
+
+  } else {
+    updatedURL = 'http://' + updatedURL;
+  }
+
+  urlDatabase[req.params.shortURL].longURL = updatedURL; // Manali Bhattacharyya RA
   res.redirect('/urls/');
 });
 
