@@ -3,14 +3,12 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-// const cookieParser = require("cookie-parser"); // Hat tip to Caden for the spoiler/hint
-// app.use(cookieParser()); // Hat tip to Penny for the spoiler/hint
 const bcrypt = require('bcryptjs');
 
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
-  keys: ['lloyd'] // Jonathan Fishbein RA
+  keys: ['lloyd']
 }));
 
 app.set("view engine", "ejs");
@@ -18,8 +16,6 @@ app.set("view engine", "ejs");
 const { generateRandomString, getUserByEmail, urlsForUser } = require('./helpers');
 
 const urlDatabase = {
-  // "b2xVn2": "http://www.lighthouselabs.ca",
-  // "9sm5xK": "http://www.google.com"
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
   "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
@@ -55,12 +51,8 @@ app.get("/urls", (req, res) => {
     console.log("403 error");
     return;
   }
-  
-  // console.log(urlDatabase);
-  // console.log(urlsForUser(users[req.session.user_id].id));
 
   const templateVars = {
-    // username: req.session["username"], // Display the Username
     urls: urlsForUser(users[req.session.user_id].id, urlDatabase),
     user: users[req.session.user_id]
   };
@@ -68,9 +60,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString(); // Hat tip to Devin McGillivray for the spoiler/hint
+  const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
-    longURL: req.body.longURL, // Hat tip to Devin McGillivray for the spoiler/hint
+    longURL: req.body.longURL,
     userID: users[req.session.user_id].id
   };
   
@@ -80,9 +72,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[shortURL].longURL = 'http://' + urlDatabase[shortURL].longURL;
   }
 
-  // console.log(req.body);  // Log the POST request body to the console
-  res.redirect(`/urls/${shortURL}`); // Hat tip to Paul Ladd for the spoiler/hint
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -92,7 +82,6 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = {
-    // username: req.session["username"], // Display the Username
     user: users[req.session.user_id]
   };
   res.render("urls_new", templateVars);
@@ -105,7 +94,7 @@ app.get("/u/:shortURL", (req, res) => {
     return;
   }
 
-  const longURL = urlDatabase[req.params.shortURL].longURL; // Hat tip to Ievgen Dilevskyi for the spoiler/hint
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -129,7 +118,6 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   const templateVars = {
-    // username: req.session["username"], // Display the Username
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.session.user_id]
@@ -150,7 +138,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     return;
   }
 
-  delete urlDatabase[req.params.shortURL]; // Edward Smith RA
+  delete urlDatabase[req.params.shortURL];
   res.redirect('/urls/');
 });
 
@@ -162,11 +150,10 @@ app.post("/urls/:shortURL", (req, res) => {
     updatedURL = 'http://' + updatedURL;
   }
 
-  urlDatabase[req.params.shortURL].longURL = updatedURL; // Manali Bhattacharyya RA
+  urlDatabase[req.params.shortURL].longURL = updatedURL;
   res.redirect('/urls/');
 });
 
-//Create a Login Page
 app.get("/login", (req, res) => {
   if (req.session.user_id) {
     res.redirect('/urls/');
@@ -174,17 +161,12 @@ app.get("/login", (req, res) => {
   }
 
   const templateVars = {
-    // username: req.session["username"],
     user: users[req.session.user_id]
   };
   res.render("urls_login", templateVars);
 });
 
 app.post("/login", (req, res) => {
-  // console.log(req.body);
-  // res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
-  // console.log(req.body.username);
-
   let userIDInQuestion = getUserByEmail(req.body.email, users).id;
 
   if (userIDInQuestion === undefined) {
@@ -193,8 +175,7 @@ app.post("/login", (req, res) => {
     return;
   }
 
-  if (bcrypt.compareSync(req.body.password, users[userIDInQuestion].password)) { //Modify your login endpoint to use bcrypt to check the password.
-    // res.cookie('user_id', users[userIDInQuestion].id);
+  if (bcrypt.compareSync(req.body.password, users[userIDInQuestion].password)) {
     req.session.user_id = users[userIDInQuestion].id;
     res.redirect('/urls/');
     return;
@@ -202,21 +183,13 @@ app.post("/login", (req, res) => {
   
   res.status(403).send("403: Password does not match.");
   console.log("403 error");
-  
 });
 
 app.post("/logout", (req, res) => {
-  // res.clearCookie('username'); // clears the username cookie
-  // res.clearCookie('user_id');
   req.session = null;
   res.redirect('/urls/');
 });
 
-// Hat tip to Penny req.session["username"] seems to always come back undefined,
-// the problem was that my "name" param needed to be "username"
-// Hat tip to Ievgen <%= user.email%>
-
-// Create a Registration Page (seems like urls_new is a good template)
 app.get("/register", (req, res) => {
   if (req.session.user_id) {
     res.redirect('/urls/');
@@ -224,22 +197,19 @@ app.get("/register", (req, res) => {
   }
 
   const templateVars = {
-    // username: req.session["username"],
-    user: users[req.session.user_id] // Hat tip to Ievgen Dilevskyi for the spoiler/hint
+    user: users[req.session.user_id]
   };
   res.render("urls_register", templateVars);
 });
 
-// Create a Registration Handler (seems like POST to edit longURL is a good template)
 app.post("/register", (req, res) => {
-  // console.log(req.body);
   const randomSix = generateRandomString();
   const unhashedPassword = req.body.password;
 
   let user = {
     id: randomSix,
     email: req.body.email,
-    password: bcrypt.hashSync(unhashedPassword, 10) // Modify your registration endpoint to use bcrypt to hash the password
+    password: bcrypt.hashSync(unhashedPassword, 10)
   };
 
   if (req.body.email === "" || req.body.password === "") {
@@ -249,15 +219,12 @@ app.post("/register", (req, res) => {
   }
 
   if (getUserByEmail(req.body.email, users) !== false) {
-    res.status(400).send("400: Email already exists."); // Hat tip to @latagore for res.status(400).syntax
+    res.status(400).send("400: Email already exists.");
     console.log("400 error");
     return;
   }
 
   users[randomSix] = user;
-  // console.log(user);
-  // console.log(users);
-  // res.cookie('user_id', users[randomSix].id);
   req.session.user_id = users[randomSix].id;
   res.redirect('/urls/');
 });
