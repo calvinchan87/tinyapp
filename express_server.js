@@ -25,20 +25,20 @@ function generateRandomString() {
   return randomSix;
 };
 
-const getUserByEmail = function(input) {
-  for (const x in users) {
-    if (users[x].email === input) {
-      return users[x]; // refactoring ideas from @wesley-wong and @berk-ozer
+const getUserByEmail = function(input, database) {
+  for (const x in database) {
+    if (database[x].email === input) {
+      return database[x]; // refactoring ideas from @wesley-wong and @berk-ozer
     }
   }
   return false;
 };
 
-const urlsForUser = function(input) {
+const urlsForUser = function(input, database) {
   let customURLs = {};
-  for (const x in urlDatabase) {
-    if (urlDatabase[x].userID === input) {
-      customURLs[x] = urlDatabase[x];
+  for (const x in database) {
+    if (database[x].userID === input) {
+      customURLs[x] = database[x];
     }
   }
   return customURLs;
@@ -88,7 +88,7 @@ app.get("/urls", (req, res) => {
 
   const templateVars = {
     // username: req.session["username"], // Display the Username
-    urls: urlsForUser(users[req.session.user_id].id),
+    urls: urlsForUser(users[req.session.user_id].id, urlDatabase),
     user: users[req.session.user_id]
   };
   res.render("urls_index", templateVars);
@@ -212,7 +212,7 @@ app.post("/login", (req, res) => {
   // res.cookie('username', req.body.username); // It should set a cookie named username to the value submitted in the request body via the login form
   // console.log(req.body.username);
 
-  let userIDInQuestion = getUserByEmail(req.body.email).id;
+  let userIDInQuestion = getUserByEmail(req.body.email, users).id;
 
   if (userIDInQuestion === undefined) {
     res.status(403).send("403: Email can not be found.");
@@ -275,7 +275,7 @@ app.post("/register", (req, res) => {
     return;
   };
 
-  if (getUserByEmail(req.body.email) !== false) {
+  if (getUserByEmail(req.body.email, users) !== false) {
     res.status(400).send("400: Email already exists."); // Hat tip to @latagore for res.status(400).syntax
     console.log("400 error");
     return;
