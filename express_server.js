@@ -126,6 +126,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    res.status(403).send("403: This shortened URL doesn't exist.");
+    console.log("403 error");
+    return;
+  }
+
   const longURL = urlDatabase[req.params.shortURL].longURL; // Hat tip to Ievgen Dilevskyi for the spoiler/hint
   res.redirect(longURL);
 });
@@ -136,7 +142,13 @@ app.get("/urls/:shortURL", (req, res) => {
     console.log("403 error");
     return;
   }
-  
+
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    res.status(403).send("403: This shortened URL doesn't exist, so its details can not be updated.");
+    console.log("403 error");
+    return;
+  }
+
   if (users[req.session.user_id].id !== urlDatabase[req.params.shortURL].userID) {
     res.status(403).send("403: This shortened URL does not belong to you, so its details can not be accessed.");
     console.log("403 error");
@@ -170,7 +182,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-
   let updatedURL = req.body.longURL;
   if (updatedURL.startsWith('http://') || updatedURL.startsWith('https://')) {
 
@@ -184,6 +195,11 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //Create a Login Page
 app.get("/login", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect('/urls/');
+    return;
+  }
+
   const templateVars = {
     // username: req.session["username"],
     user: users[req.session.user_id]
@@ -198,7 +214,7 @@ app.post("/login", (req, res) => {
 
   let userIDInQuestion = getUserByEmail(req.body.email).id;
 
-  if (userIDInQuestion === false) {
+  if (userIDInQuestion === undefined) {
     res.status(403).send("403: Email can not be found.");
     console.log("403 error");
     return;
@@ -229,6 +245,11 @@ app.post("/logout", (req, res) => {
 
 // Create a Registration Page (seems like urls_new is a good template)
 app.get("/register", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect('/urls/');
+    return;
+  }
+
   const templateVars = {
     // username: req.session["username"],
     user: users[req.session.user_id] // Hat tip to Ievgen Dilevskyi for the spoiler/hint
