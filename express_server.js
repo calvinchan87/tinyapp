@@ -3,9 +3,15 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-const cookieParser = require("cookie-parser"); // Hat tip to Caden for the spoiler/hint
-app.use(cookieParser()); // Hat tip to Penny for the spoiler/hint
+// const cookieParser = require("cookie-parser"); // Hat tip to Caden for the spoiler/hint
+// app.use(cookieParser()); // Hat tip to Penny for the spoiler/hint
 const bcrypt = require('bcryptjs');
+
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['lloyd'] // Jonathan Fishbein RA
+}))
 
 app.set("view engine", "ejs");
 
@@ -59,7 +65,11 @@ const users = {
 }
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (users[req.session.user_id] === undefined) {
+    res.redirect('/login');
+    return;
+  }
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -67,19 +77,19 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  if (users[req.cookies.user_id] === undefined) {
-    res.status(403).send("403: Log in or register first to see shortened URLs.");
+  if (users[req.session.user_id] === undefined) {
+    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register/a> first to see shortened URLs.");
     console.log("403 error");
     return;
   };
   
   // console.log(urlDatabase);
-  // console.log(urlsForUser(users[req.cookies.user_id].id));
+  // console.log(urlsForUser(users[req.session.user_id].id));
 
   const templateVars = {
-    // username: req.cookies["username"], // Display the Username
-    urls: urlsForUser(users[req.cookies.user_id].id),
-    user: users[req.cookies.user_id]
+    // username: req.session["username"], // Display the Username
+    urls: urlsForUser(users[req.session.user_id].id),
+    user: users[req.session.user_id]
   };
   res.render("urls_index", templateVars);
 });
@@ -88,7 +98,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); // Hat tip to Devin McGillivray for the spoiler/hint
   urlDatabase[shortURL] = {
     longURL: req.body.longURL, // Hat tip to Devin McGillivray for the spoiler/hint
-    userID: users[req.cookies.user_id].id
+    userID: users[req.session.user_id].id
   }
   
   if (urlDatabase[shortURL].longURL.startsWith('http://') || urlDatabase[shortURL].longURL.startsWith('https://')) {
@@ -103,14 +113,14 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (users[req.cookies.user_id] === undefined) {
+  if (users[req.session.user_id] === undefined) {
     res.redirect('/login');
     return;
   };
 
   const templateVars = {
-    // username: req.cookies["username"], // Display the Username
-    user: users[req.cookies.user_id]
+    // username: req.session["username"], // Display the Username
+    user: users[req.session.user_id]
   };
   res.render("urls_new", templateVars);
 });
@@ -121,35 +131,35 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (users[req.cookies.user_id] === undefined) {
-    res.status(403).send("403: Log in or register first to see shortened URL details.");
+  if (users[req.session.user_id] === undefined) {
+    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register/a> first to see shortened URL details.");
     console.log("403 error");
     return;
   }
   
-  if (users[req.cookies.user_id].id !== urlDatabase[req.params.shortURL].userID) {
+  if (users[req.session.user_id].id !== urlDatabase[req.params.shortURL].userID) {
     res.status(403).send("403: This shortened URL does not belong to you, so its details can not be accessed.");
     console.log("403 error");
     return;
   }
 
   const templateVars = {
-    // username: req.cookies["username"], // Display the Username
+    // username: req.session["username"], // Display the Username
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: users[req.cookies.user_id]
+    user: users[req.session.user_id]
   };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (users[req.cookies.user_id] === undefined) {
-    res.status(403).send("403: Log in or register first to delete URLs.");
+  if (users[req.session.user_id] === undefined) {
+    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register/a> first to delete URLs.");
     console.log("403 error");
     return;
   }
   
-  if (users[req.cookies.user_id].id !== urlDatabase[req.params.shortURL].userID) {
+  if (users[req.session.user_id].id !== urlDatabase[req.params.shortURL].userID) {
     res.status(403).send("403: This shortened URL does not belong to you, so it can not be deleted.");
     console.log("403 error");
     return;
@@ -175,8 +185,8 @@ app.post("/urls/:shortURL", (req, res) => {
 //Create a Login Page
 app.get("/login", (req, res) => {
   const templateVars = {
-    // username: req.cookies["username"],
-    user: users[req.cookies.user_id]
+    // username: req.session["username"],
+    user: users[req.session.user_id]
   };
   res.render("urls_login", templateVars);
 });
@@ -195,7 +205,8 @@ app.post("/login", (req, res) => {
   };
 
   if (bcrypt.compareSync(req.body.password, users[userIDInQuestion].password)) { //Modify your login endpoint to use bcrypt to check the password.
-    res.cookie('user_id', users[userIDInQuestion].id);
+    // res.cookie('user_id', users[userIDInQuestion].id);
+    req.session.user_id = users[userIDInQuestion].id; 
     res.redirect('/urls/');
     return;
   }
@@ -207,19 +218,20 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   // res.clearCookie('username'); // clears the username cookie
-  res.clearCookie('user_id');
+  // res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls/');
 });
 
-// Hat tip to Penny req.cookies["username"] seems to always come back undefined,
+// Hat tip to Penny req.session["username"] seems to always come back undefined,
 // the problem was that my "name" param needed to be "username"
 // Hat tip to Ievgen <%= user.email%>
 
 // Create a Registration Page (seems like urls_new is a good template)
 app.get("/register", (req, res) => {
   const templateVars = {
-    // username: req.cookies["username"],
-    user: users[req.cookies.user_id] // Hat tip to Ievgen Dilevskyi for the spoiler/hint
+    // username: req.session["username"],
+    user: users[req.session.user_id] // Hat tip to Ievgen Dilevskyi for the spoiler/hint
   };
   res.render("urls_register", templateVars);
 });
@@ -251,7 +263,8 @@ app.post("/register", (req, res) => {
   users[randomSix] = user;
   // console.log(user);
   // console.log(users);
-  res.cookie('user_id', users[randomSix].id);
+  // res.cookie('user_id', users[randomSix].id);
+  req.session.user_id = users[randomSix].id; 
   res.redirect('/urls/');
 });
 
