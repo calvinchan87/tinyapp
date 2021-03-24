@@ -11,7 +11,7 @@ const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: ['lloyd'] // Jonathan Fishbein RA
-}))
+}));
 
 app.set("view engine", "ejs");
 
@@ -24,18 +24,18 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: bcrypt.hashSync("dishwasher-funk", 10)
   }
-}
+};
 
 app.get("/", (req, res) => {
   if (users[req.session.user_id] === undefined) {
@@ -54,7 +54,7 @@ app.get("/urls", (req, res) => {
     res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register</a> first to see shortened URLs.");
     console.log("403 error");
     return;
-  };
+  }
   
   // console.log(urlDatabase);
   // console.log(urlsForUser(users[req.session.user_id].id));
@@ -72,7 +72,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {
     longURL: req.body.longURL, // Hat tip to Devin McGillivray for the spoiler/hint
     userID: users[req.session.user_id].id
-  }
+  };
   
   if (urlDatabase[shortURL].longURL.startsWith('http://') || urlDatabase[shortURL].longURL.startsWith('https://')) {
 
@@ -89,7 +89,7 @@ app.get("/urls/new", (req, res) => {
   if (users[req.session.user_id] === undefined) {
     res.redirect('/login');
     return;
-  };
+  }
 
   const templateVars = {
     // username: req.session["username"], // Display the Username
@@ -191,17 +191,17 @@ app.post("/login", (req, res) => {
     res.status(403).send("403: Email can not be found.");
     console.log("403 error");
     return;
-  };
+  }
 
   if (bcrypt.compareSync(req.body.password, users[userIDInQuestion].password)) { //Modify your login endpoint to use bcrypt to check the password.
     // res.cookie('user_id', users[userIDInQuestion].id);
-    req.session.user_id = users[userIDInQuestion].id; 
+    req.session.user_id = users[userIDInQuestion].id;
     res.redirect('/urls/');
     return;
   }
   
-    res.status(403).send("403: Password does not match.");
-    console.log("403 error");
+  res.status(403).send("403: Password does not match.");
+  console.log("403 error");
   
 });
 
@@ -246,19 +246,19 @@ app.post("/register", (req, res) => {
     res.status(400).send("400: Please enter a valid email address and password.");
     console.log("400 error");
     return;
-  };
+  }
 
   if (getUserByEmail(req.body.email, users) !== false) {
     res.status(400).send("400: Email already exists."); // Hat tip to @latagore for res.status(400).syntax
     console.log("400 error");
     return;
-  };
+  }
 
   users[randomSix] = user;
   // console.log(user);
   // console.log(users);
   // res.cookie('user_id', users[randomSix].id);
-  req.session.user_id = users[randomSix].id; 
+  req.session.user_id = users[randomSix].id;
   res.redirect('/urls/');
 });
 

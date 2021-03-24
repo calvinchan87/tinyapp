@@ -1,8 +1,8 @@
-function generateRandomString() {
+const generateRandomString = function() {
   let randomSix   = '';
   let chars       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let charsLength = chars.length;
-  for (var i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) {
     randomSix += chars.charAt(Math.floor(Math.random() * charsLength));
   }
   return randomSix;
