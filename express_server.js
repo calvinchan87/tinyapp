@@ -78,7 +78,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   if (users[req.session.user_id] === undefined) {
-    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register/a> first to see shortened URLs.");
+    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register</a> first to see shortened URLs.");
     console.log("403 error");
     return;
   };
@@ -132,7 +132,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (users[req.session.user_id] === undefined) {
-    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register/a> first to see shortened URL details.");
+    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register</a> first to see shortened URL details.");
     console.log("403 error");
     return;
   }
@@ -154,7 +154,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (users[req.session.user_id] === undefined) {
-    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register/a> first to delete URLs.");
+    res.status(403).send("403: <a href=/login>Log in</a>  or <a href=/register>register</a> first to delete URLs.");
     console.log("403 error");
     return;
   }
